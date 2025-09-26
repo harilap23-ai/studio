@@ -54,6 +54,8 @@ export function GenerateTimetable() {
     const facultiesRaw = formData.get('faculties') as string;
     const subjectsRaw = formData.get('subjects') as string;
     const batchesRaw = formData.get('batches') as string;
+    const facultyLeave = parseInt(formData.get('faculty-leave') as string);
+
 
     const classrooms = classroomsRaw.split('\n').map(line => {
         const [name, capacity] = line.split(',').map(s => s.trim());
@@ -62,13 +64,12 @@ export function GenerateTimetable() {
 
     const faculties = facultiesRaw.split('\n').map(line => {
         const [name, ...subjects] = line.split(',').map(s => s.trim());
-        // Mocking availability and workload for now
-        return { 
-            name, 
+        return {
+            name,
             subjects,
             maxWorkload: 20, // Mocked
-            monthlyLeaves: 2, // Mocked
-            availability: days.map(day => ({ day, slots: timeSlots.map(() => true) })) // Mocked
+            monthlyLeaves: facultyLeave,
+            availability: days.map(day => ({ day, slots: timeSlots.map(() => Math.random() > 0.1) })) // Mocked availability with some random unavailable slots
         };
     });
 
@@ -210,5 +211,3 @@ EN102, 2"/>
     </Card>
   );
 }
-
-    
