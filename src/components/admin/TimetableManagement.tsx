@@ -1,3 +1,6 @@
+
+"use client";
+
 import {
   Card,
   CardContent,
@@ -15,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
-import { fullTimetable, faculties, subjects, classrooms, batches, timeSlots, days } from "@/lib/data";
+import { fullTimetable as initialTimetable, faculties, subjects, classrooms, batches, timeSlots, days } from "@/lib/data";
 import {
   Dialog,
   DialogContent,
@@ -23,12 +26,55 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription
+  DialogDescription,
+  DialogClose
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+type TimetableEntry = {
+    day: string;
+    time: string;
+    subject: string;
+    faculty: string;
+    room: string;
+    batch: string;
+}
 
 export function TimetableManagement() {
+    const { toast } = useToast();
+    const [fullTimetable, setFullTimetable] = useState(initialTimetable);
+    
+    const handleAddClass = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const newClass: TimetableEntry = {
+            day: formData.get('day') as string,
+            time: formData.get('time') as string,
+            subject: formData.get('subject') as string,
+            faculty: formData.get('faculty') as string,
+            room: formData.get('room') as string,
+            batch: formData.get('batch') as string,
+        };
+
+        if(Object.values(newClass).some(val => !val)) {
+            toast({
+                title: "Error",
+                description: "Please fill all the fields.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setFullTimetable(prev => [...prev, newClass]);
+        toast({
+            title: "Class Added",
+            description: "New class has been added to the timetable."
+        });
+    }
+
   return (
     <Card>
       <CardHeader>
@@ -44,6 +90,7 @@ export function TimetableManagement() {
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
+                <form onSubmit={handleAddClass}>
                 <DialogHeader>
                 <DialogTitle>Add New Class</DialogTitle>
                 <DialogDescription>
@@ -53,7 +100,7 @@ export function TimetableManagement() {
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="day" className="text-right">Day</Label>
-                        <Select>
+                        <Select name="day">
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select a day" />
                             </SelectTrigger>
@@ -64,7 +111,7 @@ export function TimetableManagement() {
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="time" className="text-right">Time</Label>
-                        <Select>
+                        <Select name="time">
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select a time slot" />
                             </SelectTrigger>
@@ -75,7 +122,7 @@ export function TimetableManagement() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="subject" className="text-right">Subject</Label>
-                         <Select>
+                         <Select name="subject">
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select a subject" />
                             </SelectTrigger>
@@ -86,7 +133,7 @@ export function TimetableManagement() {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="faculty" className="text-right">Faculty</Label>
-                         <Select>
+                         <Select name="faculty">
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select a faculty" />
                             </SelectTrigger>
@@ -97,7 +144,7 @@ export function TimetableManagement() {
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="batch" className="text-right">Batch</Label>
-                         <Select>
+                         <Select name="batch">
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select a batch" />
                             </SelectTrigger>
@@ -108,7 +155,7 @@ export function TimetableManagement() {
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="room" className="text-right">Room</Label>
-                         <Select>
+                         <Select name="room">
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select a room" />
                             </SelectTrigger>
@@ -119,8 +166,11 @@ export function TimetableManagement() {
                     </div>
                 </div>
                 <DialogFooter>
-                <Button type="submit">Save changes</Button>
+                    <DialogClose asChild>
+                        <Button type="submit">Save changes</Button>
+                    </DialogClose>
                 </DialogFooter>
+                </form>
             </DialogContent>
             </Dialog>
         </div>
@@ -143,10 +193,10 @@ export function TimetableManagement() {
               <TableRow key={index}>
                 <TableCell>{item.day}</TableCell>
                 <TableCell>{item.time}</TableCell>
-                <TableCell>{item.subject}</TableCell>
-                <TableCell>{item.faculty}</TableCell>
-                <TableCell>{item.room}</TableCell>
-                <TableCell>{item.batch}</TableCell>
+                <TableCell>{subjects.find(s=>s.id === item.subject)?.name || item.subject}</TableCell>
+                <TableCell>{faculties.find(f=>f.id === item.faculty)?.name || item.faculty}</TableCell>
+                <TableCell>{classrooms.find(c=>c.id === item.room)?.name || item.room}</TableCell>
+                <TableCell>{batches.find(b=>b.id === item.batch)?.name || item.batch}</TableCell>
                 <TableCell className="text-right">
                     <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
@@ -159,3 +209,5 @@ export function TimetableManagement() {
     </Card>
   );
 }
+
+    

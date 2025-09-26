@@ -1,3 +1,4 @@
+
 export const users = [
   {
     id: 1,
@@ -96,17 +97,19 @@ export const timeSlots = ['09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '12
 export const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 export const fullTimetable = [
-    { day: 'Monday', time: '09:00 - 10:00', subject: 'CS101', faculty: 'Dr. Alan Grant', room: 'C101', batch: 'B2025_CS'},
-    { day: 'Monday', time: '10:00 - 11:00', subject: 'MA203', faculty: 'Dr. Evelyn Reed', room: 'C102', batch: 'B2026_ME'},
-    { day: 'Tuesday', time: '11:00 - 12:00', subject: 'PY101', faculty: 'Prof. Ian Malcolm', room: 'L201', batch: 'B2025_CS'},
-    { day: 'Wednesday', time: '09:00 - 10:00', subject: 'EN102', faculty: 'Dr. Ellie Sattler', room: 'H301', batch: 'B2025_EE'},
+    { day: 'Monday', time: '09:00 - 10:00', subject: 'CS101', faculty: 'F001', room: 'C101', batch: 'B2025_CS'},
+    { day: 'Monday', time: '10:00 - 11:00', subject: 'MA203', faculty: 'F002', room: 'C102', batch: 'B2026_ME'},
+    { day: 'Tuesday', time: '11:00 - 12:00', subject: 'PY101', faculty: 'F003', room: 'L201', batch: 'B2025_CS'},
+    { day: 'Wednesday', time: '09:00 - 10:00', subject: 'EN102', faculty: 'F004', room: 'H301', batch: 'B2025_EE'},
 ]
 
 export const students = [
-  { id: 'S001', name: 'John Doe', batch: '2025 Computer Science', avatar: 'https://picsum.photos/seed/s001/100/100' },
-  { id: 'S002', name: 'Jane Smith', batch: '2025 Computer Science', avatar: 'https://picsum.photos/seed/s002/100/100' },
-  { id: 'S003', name: 'Peter Jones', batch: '2025 Computer Science', avatar: 'https://picsum.photos/seed/s003/100/100' },
-  { id: 'S004', name: 'Mary Williams', batch: '2025 Computer Science', avatar: 'https://picsum.photos/seed/s004/100/100' },
-  { id: 'S005', name: 'David Brown', batch: '2025 Computer Science', avatar: 'https://picsum.photos/seed/s005/100/100' },
-  { id: 'S006', name: 'Sarah Taylor', batch: '2025 Computer Science', avatar: 'https://picsum.photos/seed/s006/100/100' },
+  { id: 'S001', name: 'John Doe', batch: '2025 Computer Science' },
+  { id: 'S002', name: 'Jane Smith', batch: '2025 Computer Science' },
+  { id: 'S003', name: 'Peter Jones', batch: '2025 Computer Science' },
+  { id: 'S004', name: 'Mary Williams', batch: '2025 Computer Science' },
+  { id: 'S005', name: 'David Brown', batch: '2025 Computer Science' },
+  { id: 'S006', name: 'Sarah Taylor', batch: '2025 Computer Science' },
 ]
+
+    

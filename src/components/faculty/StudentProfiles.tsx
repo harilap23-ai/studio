@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import {
   Card,
@@ -8,20 +9,22 @@ import {
 } from '@/components/ui/card';
 import { students } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function StudentProfiles() {
+    const studentImages = PlaceHolderImages.filter(img => img.id.startsWith('student-avatar-'));
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {students.map((student) => (
+      {students.map((student, index) => (
         <Card key={student.id} className="text-center">
           <CardHeader>
             <div className="relative mx-auto h-24 w-24">
               <Image
-                src={student.avatar}
+                src={studentImages[index % studentImages.length].imageUrl}
                 alt={student.name}
-                layout="fill"
+                fill
                 className="rounded-full object-cover"
-                data-ai-hint="student portrait"
+                data-ai-hint={studentImages[index % studentImages.length].imageHint}
               />
             </div>
           </CardHeader>
@@ -37,3 +40,5 @@ export function StudentProfiles() {
     </div>
   );
 }
+
+    

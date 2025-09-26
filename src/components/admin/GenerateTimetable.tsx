@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -24,120 +25,190 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { generateOptimizedTimetables, GenerateTimetableInput, GenerateTimetableOutput } from "@/ai/flows/generate-optimized-timetables";
+import { timeSlots, days } from "@/lib/data";
+
+type TimetableOption = {
+  timetable: Record<string, {
+      subject: string;
+      faculty: string;
+      classroom: string;
+      time: string;
+  }>;
+  qualityScore: number;
+  violations: string[];
+}
 
 export function GenerateTimetable() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [generated, setGenerated] = useState(false);
+  const [generatedTimetables, setGeneratedTimetables] = useState<GenerateTimetableOutput | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setGenerated(false);
-    setTimeout(() => {
-      setIsLoading(false);
-      setGenerated(true);
+    setGeneratedTimetables(null);
+
+    const formData = new FormData(e.currentTarget);
+    const classroomsRaw = formData.get('classrooms') as string;
+    const facultiesRaw = formData.get('faculties') as string;
+    const subjectsRaw = formData.get('subjects') as string;
+    const batchesRaw = formData.get('batches') as string;
+
+    const classrooms = classroomsRaw.split('\n').map(line => {
+        const [name, capacity] = line.split(',').map(s => s.trim());
+        return { name, capacity: parseInt(capacity) };
+    });
+
+    const faculties = facultiesRaw.split('\n').map(line => {
+        const [name, ...subjects] = line.split(',').map(s => s.trim());
+        // Mocking availability and workload for now
+        return { 
+            name, 
+            subjects,
+            maxWorkload: 20, // Mocked
+            monthlyLeaves: 2, // Mocked
+            availability: days.map(day => ({ day, slots: timeSlots.map(() => true) })) // Mocked
+        };
+    });
+
+     const subjects = subjectsRaw.split('\n').map(line => {
+        const [name, classesPerWeek] = line.split(',').map(s => s.trim());
+        return { name, classesPerWeek: parseInt(classesPerWeek), credits: 3 }; // Mocked credits
+    });
+    
+    const batches = batchesRaw.split('\n').map(line => {
+        const [name, studentCount] = line.split(',').map(s => s.trim());
+        return { name, studentCount: parseInt(studentCount) };
+    });
+
+    const input: GenerateTimetableInput = {
+        classrooms,
+        batches,
+        subjects,
+        faculties,
+        timetableSlots: days.flatMap(day => timeSlots.map(time => ({ day, time }))),
+        constraints: {
+            maxClassesPerDay: parseInt(formData.get('max-classes') as string),
+            roomCapacityMargin: 2, // Mock
+        },
+        numberOfTimetablesToGenerate: parseInt(formData.get('num-options') as string),
+    };
+
+    try {
+      const result = await generateOptimizedTimetables(input);
+      setGeneratedTimetables(result);
       toast({
         title: "Timetables Generated!",
-        description: "3 new timetable options are ready for your review.",
+        description: `${result.length} new timetable options are ready for your review.`,
       });
-    }, 3000);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Generation Failed",
+        description: "Could not generate timetables. Please check the inputs.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Card>
-        <form onSubmit={handleSubmit}>
-      <CardHeader>
-        <CardTitle>AI Timetable Generator</CardTitle>
-        <CardDescription>
-          Provide constraints to generate multiple optimized timetable options.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="classrooms">Classrooms (name, capacity)</Label>
-                <Textarea id="classrooms" placeholder="e.g., Room 101, 60&#x0a;Lab 201, 40" rows={3} defaultValue="Room 101, 60\nLab 201, 40\nHall 301, 150"/>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="faculties">Faculties (name, subjects)</Label>
-                <Textarea id="faculties" placeholder="e.g., Dr. Smith, CS101, CS202&#x0a;Prof. Jones, MA101" rows={3} defaultValue="Dr. Grant, CS101, PY101\nDr. Reed, MA203\nProf. Malcolm, PY101"/>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="subjects">Subjects (name, classes/week)</Label>
-                <Textarea id="subjects" placeholder="e.g., CS101, 3&#x0a;MA101, 4" rows={3} defaultValue="CS101, 3\nMA203, 2\nPY101, 4\nEN102, 2"/>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="batches">Batches (name, size)</Label>
-                <Textarea id="batches" placeholder="e.g., 2025 CS, 55" rows={3} defaultValue="2025 CS, 55\n2026 ME, 70\n2025 EE, 50"/>
-            </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="max-classes">Max Classes/Day</Label>
-                <Input id="max-classes" type="number" defaultValue={5} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="faculty-leave">Avg. Faculty Leave/Month</Label>
-                <Input id="faculty-leave" type="number" defaultValue={2} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="num-options">Timetables to Generate</Label>
-                <Input id="num-options" type="number" defaultValue={3} />
-            </div>
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="other-constraints">Other Constraints</Label>
-            <Textarea id="other-constraints" placeholder="e.g., No classes after 4 PM on Fridays." rows={2} />
-        </div>
-
-        {generated && (
-            <div className="space-y-4 pt-4">
-                <h3 className="font-semibold">Generated Options</h3>
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Option</TableHead>
-                        <TableHead>Quality Score</TableHead>
-                        <TableHead>Violations</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow>
-                            <TableCell>Timetable 1</TableCell>
-                            <TableCell><Badge variant="secondary">98%</Badge></TableCell>
-                            <TableCell>None</TableCell>
-                            <TableCell className="text-right"><Button size="sm" variant="outline">View</Button></TableCell>
-                        </TableRow>
-                         <TableRow>
-                            <TableCell>Timetable 2</TableCell>
-                            <TableCell><Badge variant="secondary">95%</Badge></TableCell>
-                            <TableCell>1 minor (faculty workload)</TableCell>
-                            <TableCell className="text-right"><Button size="sm" variant="outline">View</Button></TableCell>
-                        </TableRow>
-                         <TableRow>
-                            <TableCell>Timetable 3</TableCell>
-                            <TableCell><Badge variant="destructive">88%</Badge></TableCell>
-                            <TableCell>2 major (room clash, time clash)</TableCell>
-                            <TableCell className="text-right"><Button size="sm" variant="outline">View</Button></TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Bot className="mr-2 h-4 w-4" />
+      <form onSubmit={handleSubmit}>
+        <CardHeader>
+          <CardTitle>AI Timetable Generator</CardTitle>
+          <CardDescription>
+            Provide constraints to generate multiple optimized timetable options.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                  <Label htmlFor="classrooms">Classrooms (name, capacity)</Label>
+                  <Textarea id="classrooms" name="classrooms" placeholder="e.g., Room 101, 60
+Lab 201, 40" rows={3} defaultValue="Room 101, 60
+Lab 201, 40
+Hall 301, 150"/>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="faculties">Faculties (name, subjects)</Label>
+                  <Textarea id="faculties" name="faculties" placeholder="e.g., Dr. Smith, CS101, CS202
+Prof. Jones, MA101" rows={3} defaultValue="Dr. Alan Grant, CS101, PY101
+Dr. Evelyn Reed, MA203
+Prof. Ian Malcolm, PY101
+Dr. Ellie Sattler, EN102"/>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="subjects">Subjects (name, classes/week)</Label>
+                  <Textarea id="subjects" name="subjects" placeholder="e.g., CS101, 3
+MA101, 4" rows={3} defaultValue="CS101, 3
+MA203, 2
+PY101, 4
+EN102, 2"/>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="batches">Batches (name, size)</Label>
+                  <Textarea id="batches" name="batches" placeholder="e.g., 2025 CS, 55" rows={3} defaultValue="2025 CS, 55
+2026 ME, 70
+2025 EE, 50"/>
+              </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                  <Label htmlFor="max-classes">Max Classes/Day</Label>
+                  <Input id="max-classes" name="max-classes" type="number" defaultValue={5} />
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="faculty-leave">Avg. Faculty Leave/Month</Label>
+                  <Input id="faculty-leave" name="faculty-leave" type="number" defaultValue={2} />
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="num-options">Timetables to Generate</Label>
+                  <Input id="num-options" name="num-options" type="number" defaultValue={3} />
+              </div>
+          </div>
+        
+          {generatedTimetables && (
+              <div className="space-y-4 pt-4">
+                  <h3 className="font-semibold">Generated Options</h3>
+                   <Table>
+                      <TableHeader>
+                          <TableRow>
+                          <TableHead>Option</TableHead>
+                          <TableHead>Quality Score</TableHead>
+                          <TableHead>Violations</TableHead>
+                          <TableHead className="text-right">Action</TableHead>
+                          </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                          {generatedTimetables.map((option, index) => (
+                            <TableRow key={index}>
+                                <TableCell>Timetable {index + 1}</TableCell>
+                                <TableCell><Badge variant={option.qualityScore > 0.9 ? "secondary" : "destructive"}>{(option.qualityScore * 100).toFixed(0)}%</Badge></TableCell>
+                                <TableCell>{option.violations.join(', ') || 'None'}</TableCell>
+                                <TableCell className="text-right"><Button size="sm" variant="outline">View</Button></TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                  </Table>
+              </div>
           )}
-          {isLoading ? "Generating..." : "Generate Timetables"}
-        </Button>
-      </CardFooter>
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Bot className="mr-2 h-4 w-4" />
+            )}
+            {isLoading ? "Generating..." : "Generate Timetables"}
+          </Button>
+        </CardFooter>
       </form>
     </Card>
   );
 }
+
+    

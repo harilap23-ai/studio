@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -26,13 +27,49 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Upload, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export function FacultyTimetable() {
+    const { toast } = useToast();
+    const [changeRequest, setChangeRequest] = useState('');
+    const [file, setFile] = useState<File | null>(null);
+
+    const handleRequestChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!changeRequest) {
+            toast({title: "Error", description: "Please enter your request.", variant: "destructive"});
+            return;
+        }
+        console.log("Change request submitted:", changeRequest);
+        toast({
+            title: "Request Submitted",
+            description: "Your timetable change request has been submitted for review.",
+        });
+        setChangeRequest('');
+    }
+
+    const handleUploadMaterial = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!file) {
+            toast({title: "Error", description: "Please select a file to upload.", variant: "destructive"});
+            return;
+        }
+        console.log("Uploading material:", file.name);
+        toast({
+            title: "Upload Successful",
+            description: `${file.name} has been uploaded.`,
+        });
+        setFile(null);
+    }
+
+
   return (
     <Card>
       <CardHeader>
@@ -75,14 +112,18 @@ export function FacultyTimetable() {
                                     <Button size="sm" variant="outline">Request Change</Button>
                                 </DialogTrigger>
                                 <DialogContent>
+                                    <form onSubmit={handleRequestChange}>
                                     <DialogHeader>
                                         <DialogTitle>Request Timetable Change</DialogTitle>
                                         <DialogDescription>Describe the change you would like to request. An admin will review it.</DialogDescription>
                                     </DialogHeader>
-                                    <Textarea placeholder="e.g., I would like to swap this slot with my Friday 11 AM class." />
+                                    <Textarea placeholder="e.g., I would like to swap this slot with my Friday 11 AM class." value={changeRequest} onChange={e => setChangeRequest(e.target.value)} className="my-4" />
                                     <DialogFooter>
-                                        <Button><Send className="mr-2 h-4 w-4"/>Submit Request</Button>
+                                        <DialogClose asChild>
+                                            <Button type="submit"><Send className="mr-2 h-4 w-4"/>Submit Request</Button>
+                                        </DialogClose>
                                     </DialogFooter>
+                                    </form>
                                 </DialogContent>
                              </Dialog>
                              <Dialog>
@@ -90,17 +131,21 @@ export function FacultyTimetable() {
                                     <Button size="sm" variant="ghost"><Upload className="h-4 w-4 mr-2"/>Materials</Button>
                                 </DialogTrigger>
                                 <DialogContent>
+                                    <form onSubmit={handleUploadMaterial}>
                                     <DialogHeader>
                                         <DialogTitle>Upload Class Materials</DialogTitle>
                                         <DialogDescription>Upload files for {classInfo.subject}.</DialogDescription>
                                     </DialogHeader>
-                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5 my-4">
                                         <Label htmlFor="materials">PDF, notes, video links</Label>
-                                        <Input id="materials" type="file" />
+                                        <Input id="materials" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                                     </div>
                                     <DialogFooter>
-                                        <Button><Upload className="mr-2 h-4 w-4"/>Upload</Button>
+                                        <DialogClose asChild>
+                                            <Button type="submit"><Upload className="mr-2 h-4 w-4"/>Upload</Button>
+                                        </DialogClose>
                                     </DialogFooter>
+                                    </form>
                                 </DialogContent>
                              </Dialog>
                           </div>
@@ -118,3 +163,5 @@ export function FacultyTimetable() {
     </Card>
   );
 }
+
+    
