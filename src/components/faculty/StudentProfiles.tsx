@@ -20,11 +20,12 @@ export function StudentProfiles() {
           <CardHeader>
             <div className="relative mx-auto h-24 w-24">
               <Image
-                src={studentImages[index % studentImages.length].imageUrl}
+                src={studentImages[index % studentImages.length]?.imageUrl || "https://picsum.photos/seed/placeholder/100/100"}
                 alt={student.name}
-                fill
+                width={100}
+                height={100}
                 className="rounded-full object-cover"
-                data-ai-hint={studentImages[index % studentImages.length].imageHint}
+                data-ai-hint={studentImages[index % studentImages.length]?.imageHint || "student portrait"}
               />
             </div>
           </CardHeader>
@@ -40,5 +41,3 @@ export function StudentProfiles() {
     </div>
   );
 }
-
-    

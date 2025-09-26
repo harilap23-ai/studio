@@ -46,6 +46,7 @@ type TimetableEntry = {
 export function TimetableManagement() {
     const { toast } = useToast();
     const [fullTimetable, setFullTimetable] = useState(initialTimetable);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     
     const handleAddClass = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -73,6 +74,7 @@ export function TimetableManagement() {
             title: "Class Added",
             description: "New class has been added to the timetable."
         });
+        setIsAddDialogOpen(false); // Close dialog on successful add
     }
 
   return (
@@ -83,7 +85,7 @@ export function TimetableManagement() {
                 <CardTitle>Timetable Management</CardTitle>
                 <CardDescription>View and manage class schedules.</CardDescription>
             </div>
-            <Dialog>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
                 <Button>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Class
@@ -166,9 +168,7 @@ export function TimetableManagement() {
                     </div>
                 </div>
                 <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="submit">Save changes</Button>
-                    </DialogClose>
+                  <Button type="submit">Save changes</Button>
                 </DialogFooter>
                 </form>
             </DialogContent>
@@ -209,5 +209,3 @@ export function TimetableManagement() {
     </Card>
   );
 }
-
-    

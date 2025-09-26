@@ -13,7 +13,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Bot, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -27,17 +26,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { generateOptimizedTimetables, GenerateTimetableInput, GenerateTimetableOutput } from "@/ai/flows/generate-optimized-timetables";
 import { timeSlots, days, faculties as facultyData, subjects as subjectData, classrooms as classroomData, batches as batchData } from "@/lib/data";
-
-type TimetableOption = {
-  timetable: Record<string, {
-      subject: string;
-      faculty: string;
-      classroom: string;
-      time: string;
-  }>;
-  qualityScore: number;
-  violations: string[];
-}
 
 export function GenerateTimetable() {
   const { toast } = useToast();
@@ -55,16 +43,15 @@ export function GenerateTimetable() {
     const numOptions = parseInt(formData.get('num-options') as string);
     const roomCapacityMargin = 2; // Default margin
 
-    // In a real application, you might fetch this from a form, but here we use the data from lib/data.ts
     const classrooms = classroomData.map(c => ({ name: c.name, capacity: c.capacity }));
     const batches = batchData.map(b => ({ name: b.name, studentCount: b.studentCount }));
     const subjects = subjectData.map(s => ({ name: s.name, credits: s.credits, classesPerWeek: 3 })); // Assuming 3 classes per week
     const faculties = facultyData.map(f => ({
         name: f.name,
-        subjects: subjectData.map(s => s.name), // Assume faculty can teach all subjects for demo
-        maxWorkload: 20, // Mocked
+        subjects: subjectData.map(s => s.name),
+        maxWorkload: 20,
         monthlyLeaves: facultyLeave,
-        availability: days.map(day => ({ day, slots: timeSlots.map(() => Math.random() > 0.1) })) // Mocked availability
+        availability: days.map(day => ({ day, slots: timeSlots.map(() => Math.random() > 0.1) }))
     }));
 
     const input: GenerateTimetableInput = {
@@ -130,7 +117,7 @@ export function GenerateTimetable() {
                 <div><span className="font-medium">{classroomData.length}</span> Classrooms</div>
                 <div><span className="font-medium">{facultyData.length}</span> Faculties</div>
                 <div><span className="font-medium">{subjectData.length}</span> Subjects</div>
-                <div><span className.font-medium">{batchData.length}</span> Batches</div>
+                <div><span className="font-medium">{batchData.length}</span> Batches</div>
             </div>
           </div>
         

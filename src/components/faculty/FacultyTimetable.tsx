@@ -27,7 +27,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -40,6 +39,8 @@ export function FacultyTimetable() {
     const { toast } = useToast();
     const [changeRequest, setChangeRequest] = useState('');
     const [file, setFile] = useState<File | null>(null);
+    const [isChangeRequestOpen, setIsChangeRequestOpen] = useState(false);
+    const [isUploadOpen, setIsUploadOpen] = useState(false);
 
     const handleRequestChange = (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,6 +54,7 @@ export function FacultyTimetable() {
             description: "Your timetable change request has been submitted for review.",
         });
         setChangeRequest('');
+        setIsChangeRequestOpen(false);
     }
 
     const handleUploadMaterial = (e: React.FormEvent) => {
@@ -67,6 +69,9 @@ export function FacultyTimetable() {
             description: `${file.name} has been uploaded.`,
         });
         setFile(null);
+        setIsUploadOpen(false);
+        const fileInput = document.getElementById('materials') as HTMLInputElement;
+        if(fileInput) fileInput.value = '';
     }
 
 
@@ -107,7 +112,7 @@ export function FacultyTimetable() {
                           <Badge variant="outline">{classInfo.batch}</Badge>
                           <p className="text-sm text-muted-foreground">{classInfo.room}</p>
                           <div className="flex gap-2 mt-2">
-                             <Dialog>
+                             <Dialog open={isChangeRequestOpen} onOpenChange={setIsChangeRequestOpen}>
                                 <DialogTrigger asChild>
                                     <Button size="sm" variant="outline">Request Change</Button>
                                 </DialogTrigger>
@@ -119,14 +124,12 @@ export function FacultyTimetable() {
                                     </DialogHeader>
                                     <Textarea placeholder="e.g., I would like to swap this slot with my Friday 11 AM class." value={changeRequest} onChange={e => setChangeRequest(e.target.value)} className="my-4" />
                                     <DialogFooter>
-                                        <DialogClose asChild>
-                                            <Button type="submit"><Send className="mr-2 h-4 w-4"/>Submit Request</Button>
-                                        </DialogClose>
+                                        <Button type="submit"><Send className="mr-2 h-4 w-4"/>Submit Request</Button>
                                     </DialogFooter>
                                     </form>
                                 </DialogContent>
                              </Dialog>
-                             <Dialog>
+                             <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
                                 <DialogTrigger asChild>
                                     <Button size="sm" variant="ghost"><Upload className="h-4 w-4 mr-2"/>Materials</Button>
                                 </DialogTrigger>
@@ -141,9 +144,7 @@ export function FacultyTimetable() {
                                         <Input id="materials" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                                     </div>
                                     <DialogFooter>
-                                        <DialogClose asChild>
-                                            <Button type="submit"><Upload className="mr-2 h-4 w-4"/>Upload</Button>
-                                        </DialogClose>
+                                        <Button type="submit"><Upload className="mr-2 h-4 w-4"/>Upload</Button>
                                     </DialogFooter>
                                     </form>
                                 </DialogContent>
@@ -163,5 +164,3 @@ export function FacultyTimetable() {
     </Card>
   );
 }
-
-    

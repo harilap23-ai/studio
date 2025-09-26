@@ -30,9 +30,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/timetable', label: 'Timetable', icon: CalendarDays },
-    { href: '/admin/generate', label: 'AI Generator', icon: Bot },
-    { href: '/admin/notify', label: 'Notify', icon: Send },
   ];
 
   return (
@@ -50,13 +47,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href}
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={{
                     children: item.label,
                     className: 'bg-primary text-primary-foreground',
                   }}
                 >
-                  <Link href="#">
+                  <Link href={item.href}>
                     <item.icon />
                     <span>{item.label}</span>
                   </Link>

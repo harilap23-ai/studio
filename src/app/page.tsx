@@ -29,11 +29,11 @@ export default function LoginPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="user@example.com" />
+            <Input id="email" type="email" placeholder="user@example.com" defaultValue="admin@example.com" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="••••••••" />
+            <Input id="password" type="password" placeholder="••••••••" defaultValue="password" />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">

@@ -70,19 +70,27 @@ export const facultyTimetable = {
     { time: '09:00 - 10:00', subject: 'Intro to CS', batch: '2025 CS', room: 'C101' },
     null,
     { time: '11:00 - 12:00', subject: 'Data Structures', batch: '2024 CS', room: 'C102' },
+    null,
+    null,
   ],
   Tuesday: [
     null,
     { time: '10:00 - 11:00', subject: 'Intro to CS', batch: '2025 CS', room: 'C101' },
+    null,
+    null,
     null,
   ],
   Wednesday: [
     { time: '09:00 - 10:00', subject: 'Data Structures', batch: '2024 CS', room: 'C102' },
     null,
     { time: '11:00 - 12:00', subject: 'Algorithms', batch: '2024 CS', room: 'Lab 201' },
+    null,
+    null,
   ],
   Thursday: [
     { time: '09:00 - 10:00', subject: 'Intro to CS', batch: '2025 CS', room: 'C101' },
+    null,
+    null,
     null,
     null,
   ],
@@ -90,6 +98,8 @@ export const facultyTimetable = {
     null,
     { time: '10:00 - 11:00', subject: 'Data Structures', batch: '2024 CS', room: 'C102' },
     { time: '11:00 - 12:00', subject: 'Algorithms', batch: '2024 CS', room: 'Lab 201' },
+    null,
+    null,
   ],
 };
 
@@ -111,5 +121,3 @@ export const students = [
   { id: 'S005', name: 'David Brown', batch: '2025 Computer Science' },
   { id: 'S006', name: 'Sarah Taylor', batch: '2025 Computer Science' },
 ]
-
-    

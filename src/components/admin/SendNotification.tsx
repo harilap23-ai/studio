@@ -20,7 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { faculties, notifications } from "@/lib/data";
+import { faculties, notifications as notificationsData } from "@/lib/data";
 import { Send } from "lucide-react";
 import { useState } from "react";
 
@@ -28,6 +28,7 @@ export function SendNotification() {
   const { toast } = useToast();
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [message, setMessage] = useState("");
+  const [notifications, setNotifications] = useState(notificationsData);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +41,6 @@ export function SendNotification() {
       return;
     }
     
-    // This is a mock implementation. In a real app, you'd send this to a server.
     const newNotification = {
         id: notifications.length + 1,
         title: "Admin Notification",
@@ -48,8 +48,8 @@ export function SendNotification() {
         read: false,
         timestamp: new Date().toLocaleDateString(),
     };
-    // In a real app, you'd associate this notification with the selected faculty.
-    // For this demo, we're just showing a toast.
+    
+    setNotifications(prev => [newNotification, ...prev]);
     
     console.log("Sending notification:", { facultyId: selectedFaculty, message });
 
@@ -108,5 +108,3 @@ export function SendNotification() {
     </Card>
   );
 }
-
-    

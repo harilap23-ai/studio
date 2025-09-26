@@ -15,16 +15,22 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { notifications } from '@/lib/data';
+import { notifications as initialNotifications } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export function Notifications() {
+  const [notifications, setNotifications] = useState(initialNotifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAsRead = () => {
+    setNotifications(notifications.map(n => ({...n, read: true})));
+  }
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-full h-9 w-9">
+        <Button variant="ghost" size="icon" className="relative rounded-full h-9 w-9" onClick={markAsRead}>
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-bold">
