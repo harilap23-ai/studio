@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { generateOptimizedTimetables, GenerateTimetableInput, GenerateTimetableOutput } from "@/ai/flows/generate-optimized-timetables";
-import { timeSlots, days } from "@/lib/data";
+import { timeSlots, days, faculties as facultyData, subjects as subjectData, classrooms as classroomData, batches as batchData } from "@/lib/data";
 
 type TimetableOption = {
   timetable: Record<string, {
@@ -50,38 +50,22 @@ export function GenerateTimetable() {
     setGeneratedTimetables(null);
 
     const formData = new FormData(e.currentTarget);
-    const classroomsRaw = formData.get('classrooms') as string;
-    const facultiesRaw = formData.get('faculties') as string;
-    const subjectsRaw = formData.get('subjects') as string;
-    const batchesRaw = formData.get('batches') as string;
     const facultyLeave = parseInt(formData.get('faculty-leave') as string);
+    const maxClassesPerDay = parseInt(formData.get('max-classes') as string);
+    const numOptions = parseInt(formData.get('num-options') as string);
+    const roomCapacityMargin = 2; // Default margin
 
-
-    const classrooms = classroomsRaw.split('\n').map(line => {
-        const [name, capacity] = line.split(',').map(s => s.trim());
-        return { name, capacity: parseInt(capacity) };
-    });
-
-    const faculties = facultiesRaw.split('\n').map(line => {
-        const [name, ...subjects] = line.split(',').map(s => s.trim());
-        return {
-            name,
-            subjects,
-            maxWorkload: 20, // Mocked
-            monthlyLeaves: facultyLeave,
-            availability: days.map(day => ({ day, slots: timeSlots.map(() => Math.random() > 0.1) })) // Mocked availability with some random unavailable slots
-        };
-    });
-
-     const subjects = subjectsRaw.split('\n').map(line => {
-        const [name, classesPerWeek] = line.split(',').map(s => s.trim());
-        return { name, classesPerWeek: parseInt(classesPerWeek), credits: 3 }; // Mocked credits
-    });
-    
-    const batches = batchesRaw.split('\n').map(line => {
-        const [name, studentCount] = line.split(',').map(s => s.trim());
-        return { name, studentCount: parseInt(studentCount) };
-    });
+    // In a real application, you might fetch this from a form, but here we use the data from lib/data.ts
+    const classrooms = classroomData.map(c => ({ name: c.name, capacity: c.capacity }));
+    const batches = batchData.map(b => ({ name: b.name, studentCount: b.studentCount }));
+    const subjects = subjectData.map(s => ({ name: s.name, credits: s.credits, classesPerWeek: 3 })); // Assuming 3 classes per week
+    const faculties = facultyData.map(f => ({
+        name: f.name,
+        subjects: subjectData.map(s => s.name), // Assume faculty can teach all subjects for demo
+        maxWorkload: 20, // Mocked
+        monthlyLeaves: facultyLeave,
+        availability: days.map(day => ({ day, slots: timeSlots.map(() => Math.random() > 0.1) })) // Mocked availability
+    }));
 
     const input: GenerateTimetableInput = {
         classrooms,
@@ -90,10 +74,10 @@ export function GenerateTimetable() {
         faculties,
         timetableSlots: days.flatMap(day => timeSlots.map(time => ({ day, time }))),
         constraints: {
-            maxClassesPerDay: parseInt(formData.get('max-classes') as string),
-            roomCapacityMargin: 2, // Mock
+            maxClassesPerDay,
+            roomCapacityMargin,
         },
-        numberOfTimetablesToGenerate: parseInt(formData.get('num-options') as string),
+        numberOfTimetablesToGenerate: numOptions,
     };
 
     try {
@@ -107,7 +91,7 @@ export function GenerateTimetable() {
       console.error(error);
       toast({
         title: "Generation Failed",
-        description: "Could not generate timetables. Please check the inputs.",
+        description: "Could not generate timetables. Please check the inputs and try again.",
         variant: "destructive",
       });
     } finally {
@@ -121,42 +105,11 @@ export function GenerateTimetable() {
         <CardHeader>
           <CardTitle>AI Timetable Generator</CardTitle>
           <CardDescription>
-            Provide constraints to generate multiple optimized timetable options.
+            Configure constraints and let the AI generate optimized timetable options based on the existing school data.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                  <Label htmlFor="classrooms">Classrooms (name, capacity)</Label>
-                  <Textarea id="classrooms" name="classrooms" placeholder="e.g., Room 101, 60
-Lab 201, 40" rows={3} defaultValue="Room 101, 60
-Lab 201, 40
-Hall 301, 150"/>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="faculties">Faculties (name, subjects)</Label>
-                  <Textarea id="faculties" name="faculties" placeholder="e.g., Dr. Smith, CS101, CS202
-Prof. Jones, MA101" rows={3} defaultValue="Dr. Alan Grant, CS101, PY101
-Dr. Evelyn Reed, MA203
-Prof. Ian Malcolm, PY101
-Dr. Ellie Sattler, EN102"/>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="subjects">Subjects (name, classes/week)</Label>
-                  <Textarea id="subjects" name="subjects" placeholder="e.g., CS101, 3
-MA101, 4" rows={3} defaultValue="CS101, 3
-MA203, 2
-PY101, 4
-EN102, 2"/>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="batches">Batches (name, size)</Label>
-                  <Textarea id="batches" name="batches" placeholder="e.g., 2025 CS, 55" rows={3} defaultValue="2025 CS, 55
-2026 ME, 70
-2025 EE, 50"/>
-              </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                   <Label htmlFor="max-classes">Max Classes/Day</Label>
                   <Input id="max-classes" name="max-classes" type="number" defaultValue={5} />
@@ -169,6 +122,16 @@ EN102, 2"/>
                   <Label htmlFor="num-options">Timetables to Generate</Label>
                   <Input id="num-options" name="num-options" type="number" defaultValue={3} />
               </div>
+          </div>
+          <div className="p-4 bg-secondary/50 rounded-lg border border-dashed">
+            <h4 className="font-semibold text-lg mb-2">Data Preview</h4>
+            <p className="text-sm text-muted-foreground mb-4">The AI will use the following data from your application. You can manage this data in the Timetable section.</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div><span className="font-medium">{classroomData.length}</span> Classrooms</div>
+                <div><span className="font-medium">{facultyData.length}</span> Faculties</div>
+                <div><span className="font-medium">{subjectData.length}</span> Subjects</div>
+                <div><span className.font-medium">{batchData.length}</span> Batches</div>
+            </div>
           </div>
         
           {generatedTimetables && (
