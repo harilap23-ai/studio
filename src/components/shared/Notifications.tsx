@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Check } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -15,15 +15,38 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { notifications as initialNotifications } from '@/lib/data';
+import { getNotifications } from '@/lib/actions';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+
+interface Notification {
+  id: number;
+  title: string;
+  description: string;
+  read: boolean;
+  timestamp: Date;
+}
 
 export function Notifications() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  useEffect(() => {
+    const fetchNotifications = async () => {
+        const allNotifications = await getNotifications();
+        setNotifications(allNotifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+    }
+
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, []);
+
   const markAsRead = () => {
+    // This only marks them as read in the local state.
+    // A server action would be needed to persist this change.
     setNotifications(notifications.map(n => ({...n, read: true})));
   }
 
@@ -48,27 +71,31 @@ export function Notifications() {
           </CardHeader>
           <Separator />
           <CardContent className="p-0">
-            <div className="space-y-2 p-4 max-h-80 overflow-y-auto">
-              {notifications.map((notification, index) => (
-                <div
-                  key={index}
-                  className="mb-2 grid grid-cols-[25px_1fr] items-start pb-2 last:mb-0 last:pb-0"
-                >
-                  <span className={cn("flex h-2 w-2 translate-y-1 rounded-full", !notification.read && "bg-accent")} />
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {notification.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {notification.description}
-                    </p>
-                     <p className="text-xs text-muted-foreground/70">
-                      {notification.timestamp}
-                    </p>
+            {notifications.length > 0 ? (
+              <div className="space-y-2 p-4 max-h-80 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="mb-2 grid grid-cols-[25px_1fr] items-start pb-2 last:mb-0 last:pb-0"
+                  >
+                    <span className={cn("flex h-2 w-2 translate-y-1 rounded-full", !notification.read && "bg-accent")} />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {notification.title}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {notification.description}
+                      </p>
+                       <p className="text-xs text-muted-foreground/70">
+                        {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+                <p className="p-4 text-sm text-muted-foreground">No new notifications.</p>
+            )}
           </CardContent>
         </Card>
       </PopoverContent>

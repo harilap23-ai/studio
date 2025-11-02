@@ -20,7 +20,7 @@ import {
 
 import { Header } from '@/components/shared/Header';
 import { users } from '@/lib/data';
-import { Logo } from '../shared/Icons';
+import { Logo } from '@/components/shared/Icons';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -67,7 +67,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           user={{
             name: facultyUser.name,
             role: facultyUser.role,
-            avatarUrl: facultyUser.avatar,
+            avatarUrl: facultyUser.avatar || '',
           }}
         />
         <main className="flex-1 p-4 md:p-6">{children}</main>

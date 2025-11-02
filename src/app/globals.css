@@ -106,3 +106,8 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+.admin-dashboard-background {
+  background-image: url('https://static.vecteezy.com/system/resources/thumbnails/010/825/984/small/technology-background-modern-abstract-luxury-geometric-shape-premium-wallpaper-for-template-backdrop-brochure-poster-website-or-banner-free-vector.jpg');
+  background-size: cover;
+  background-position: center;
+}

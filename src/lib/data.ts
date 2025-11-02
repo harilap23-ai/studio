@@ -1,42 +1,44 @@
+interface UploadedMaterial {
+  id: number;
+  fileName: string;
+  subject: string;
+  faculty: string;
+  timestamp: Date;
+}
 
 export const users = [
   {
     id: 1,
     name: 'Admin User',
     role: 'admin',
-    avatar: 'https://picsum.photos/seed/101/100/100',
+    avatar: 'https://static.vecteezy.com/system/resources/thumbnails/016/273/514/small/personal-icon-free-vector.jpg'
   },
   {
     id: 2,
-    name: 'Dr. Evelyn Reed',
+    name: 'suresh kumar',
     role: 'faculty',
-    avatar: 'https://picsum.photos/seed/102/100/100',
   },
 ];
 
-export const notifications = [
+let uploadedMaterials: UploadedMaterial[] = [
   {
     id: 1,
-    title: 'New Class Assigned',
-    description: 'CS101 has been assigned to you on Mon at 9 AM.',
-    read: false,
-    timestamp: '2 hours ago',
-  },
-  {
-    id: 2,
-    title: 'Timetable Change Approved',
-    description: 'Your request to swap PHYS202 has been approved.',
-    read: false,
-    timestamp: '5 hours ago',
-  },
-  {
-    id: 3,
-    title: 'Weekly Report Ready',
-    description: 'Your weekly summary is available for download.',
-    read: true,
-    timestamp: '1 day ago',
+    fileName: 'CS101_Lecture_1.pdf',
+    subject: 'Intro to Computer Science',
+    faculty: 'suresh kumar',
+    timestamp: new Date(),
   },
 ];
+
+export const getUploadedMaterials = () => uploadedMaterials;
+
+export const addUploadedMaterial = (material: Omit<UploadedMaterial, 'id' | 'timestamp'>) => {
+  uploadedMaterials.unshift({
+    ...material,
+    id: uploadedMaterials.length + 1,
+    timestamp: new Date(),
+  });
+};
 
 export const classrooms = [
   { id: 'C101', name: 'Room 101', capacity: 60 },
@@ -59,36 +61,36 @@ export const batches = [
 ];
 
 export const faculties = [
-    { id: 'F001', name: 'Dr. Alan Grant' },
-    { id: 'F002', name: 'Dr. Evelyn Reed' },
-    { id: 'F003', name: 'Prof. Ian Malcolm' },
-    { id: 'F004', name: 'Dr. Ellie Sattler' },
+    { id: 'F001', name: 'suresh kumar', subjects: ['Intro to Computer Science', 'Linear Algebra'] },
+    { id: 'F002', name: 'Bharath', subjects: ['Physics I'] },
+    { id: 'F003', name: 'Akash jee', subjects: ['English Composition'] },
+    { id: 'F004', name: 'Bala Murugan', subjects: ['Intro to Computer Science'] },
 ]
 
 export const facultyTimetable = {
   Monday: [
-    { time: '09:00 - 10:00', subject: 'Intro to CS', batch: '2025 CS', room: 'C101' },
+    { time: '09:00 - 10:00', subject: 'CS101', batch: 'B2025_CS', room: 'C101' },
     null,
-    { time: '11:00 - 12:00', subject: 'Data Structures', batch: '2024 CS', room: 'C102' },
+    { time: '11:00 - 12:00', subject: 'MA203', batch: 'B2026_ME', room: 'C102' },
     null,
     null,
   ],
   Tuesday: [
     null,
-    { time: '10:00 - 11:00', subject: 'Intro to CS', batch: '2025 CS', room: 'C101' },
+    { time: '10:00 - 11:00', subject: 'CS101', batch: 'B2025_CS', room: 'C101' },
     null,
     null,
     null,
   ],
   Wednesday: [
-    { time: '09:00 - 10:00', subject: 'Data Structures', batch: '2024 CS', room: 'C102' },
+    { time: '09:00 - 10:00', subject: 'MA203', batch: 'B2026_ME', room: 'C102' },
     null,
-    { time: '11:00 - 12:00', subject: 'Algorithms', batch: '2024 CS', room: 'Lab 201' },
+    { time: '11:00 - 12:00', subject: 'PY101', batch: 'B2025_CS', room: 'L201' },
     null,
     null,
   ],
   Thursday: [
-    { time: '09:00 - 10:00', subject: 'Intro to CS', batch: '2025 CS', room: 'C101' },
+    { time: '09:00 - 10:00', subject: 'CS101', batch: 'B2025_CS', room: 'C101' },
     null,
     null,
     null,
@@ -96,8 +98,8 @@ export const facultyTimetable = {
   ],
   Friday: [
     null,
-    { time: '10:00 - 11:00', subject: 'Data Structures', batch: '2024 CS', room: 'C102' },
-    { time: '11:00 - 12:00', subject: 'Algorithms', batch: '2024 CS', room: 'Lab 201' },
+    { time: '10:00 - 11:00', subject: 'MA203', batch: 'B2026_ME', room: 'C102' },
+    { time: '11:00 - 12:00', subject: 'PY101', batch: 'B2025_CS', room: 'L201' },
     null,
     null,
   ],
@@ -114,10 +116,10 @@ export const fullTimetable = [
 ]
 
 export const students = [
-  { id: 'S001', name: 'John Doe', batch: '2025 Computer Science' },
-  { id: 'S002', name: 'Jane Smith', batch: '2025 Computer Science' },
-  { id: 'S003', name: 'Peter Jones', batch: '2025 Computer Science' },
-  { id: 'S004', name: 'Mary Williams', batch: '2025 Computer Science' },
-  { id: 'S005', name: 'David Brown', batch: '2025 Computer Science' },
-  { id: 'S006', name: 'Sarah Taylor', batch: '2025 Computer Science' },
+  { id: 'S001', name: 'Aswin', batch: '2025 Computer Science', avatar: 'https://img.freepik.com/free-vector/young-man-glasses-hoodie_1308-174658.jpg' },
+  { id: 'S002', name: 'Hariharan D', batch: '2025 Computer Science', avatar: 'https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg' },
+  { id: 'S003', name: 'Jeeva B', batch: '2025 Computer Science', avatar: 'https://img.freepik.com/premium-vector/school-boy-vector-illustration_38694-902.jpg' },
+  { id: 'S004', name: 'Deepak A', batch: '2025 Computer Science', avatar: 'https://img.freepik.com/premium-vector/round-avatar-portrait-icon-elementary-student-boy-with-backpack-flat-style_768258-3401.jpg' },
+  { id: 'S005', name: 'Kavishri S', batch: '2025 Computer Science', avatar: 'https://img.freepik.com/free-vector/smiling-woman-with-glasses_1308-177859.jpg' },
+  { id: 'S006', name: 'Harinipriya K L', batch: '2025 Computer Science', avatar: 'https://thumbs.dreamstime.com/b/smiling-teen-female-student-portrait-avatar-vector-illustration-image-generated-using-ai-tool-405958685.jpg' },
 ]

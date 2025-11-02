@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  CalendarDays,
-  Bot,
-  Send,
+  Users,
 } from 'lucide-react';
 
 import {
@@ -22,7 +20,7 @@ import {
 
 import { Header } from '@/components/shared/Header';
 import { users } from '@/lib/data';
-import { Logo } from '../shared/Icons';
+import { Logo } from '@/components/shared/Icons';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -30,6 +28,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/students', label: 'Student Profiles', icon: Users },
   ];
 
   return (
@@ -47,7 +46,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith(item.href)}
+                  isActive={pathname === item.href}
                   tooltip={{
                     children: item.label,
                     className: 'bg-primary text-primary-foreground',
@@ -68,7 +67,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           user={{
             name: adminUser.name,
             role: adminUser.role,
-            avatarUrl: adminUser.avatar,
+            avatarUrl: adminUser.avatar || '',
           }}
         />
         <main className="flex-1 p-4 md:p-6">{children}</main>

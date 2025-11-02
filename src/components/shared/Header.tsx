@@ -1,3 +1,4 @@
+
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserAvatar } from '@/components/shared/UserAvatar';
 import { Notifications } from '@/components/shared/Notifications';

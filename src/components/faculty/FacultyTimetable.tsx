@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { facultyTimetable, timeSlots, days } from "@/lib/data";
+import { facultyTimetable, timeSlots, days, addUploadedMaterial, subjects, batches, classrooms } from "@/lib/data";
+import { addNotification } from "@/lib/actions";
 import {
   Dialog,
   DialogContent,
@@ -41,13 +42,18 @@ export function FacultyTimetable() {
     const [file, setFile] = useState<File | null>(null);
     const [isChangeRequestOpen, setIsChangeRequestOpen] = useState(false);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [currentSubject, setCurrentSubject] = useState('');
 
-    const handleRequestChange = (e: React.FormEvent) => {
+    const handleRequestChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!changeRequest) {
             toast({title: "Error", description: "Please enter your request.", variant: "destructive"});
             return;
         }
+        await addNotification({
+            title: 'Timetable Change Request',
+            description: `Dr.Suresh Kumarg has requested a change: "${changeRequest}"`,
+        });
         console.log("Change request submitted:", changeRequest);
         toast({
             title: "Request Submitted",
@@ -63,6 +69,11 @@ export function FacultyTimetable() {
             toast({title: "Error", description: "Please select a file to upload.", variant: "destructive"});
             return;
         }
+        addUploadedMaterial({
+            fileName: file.name,
+            subject: currentSubject,
+            faculty: 'Dr.Suresh Kumarg',
+        });
         console.log("Uploading material:", file.name);
         toast({
             title: "Upload Successful",
@@ -101,16 +112,19 @@ export function FacultyTimetable() {
                 {days.map((day) => {
                   const daySchedule = facultyTimetable[day as keyof typeof facultyTimetable];
                   const classInfo = daySchedule ? daySchedule[slotIndex] : null;
+                  const subject = classInfo ? subjects.find(s => s.id === classInfo.subject) : null;
+                  const batch = classInfo ? batches.find(b => b.id === classInfo.batch) : null;
+                  const room = classInfo ? classrooms.find(c => c.id === classInfo.room) : null;
 
                   return (
                     <TableCell key={day}>
                       {classInfo ? (
                         <div className="flex flex-col gap-2 p-2 rounded-lg bg-secondary">
                           <p className="font-bold text-secondary-foreground">
-                            {classInfo.subject}
+                            {subject?.name}
                           </p>
-                          <Badge variant="outline">{classInfo.batch}</Badge>
-                          <p className="text-sm text-muted-foreground">{classInfo.room}</p>
+                          <Badge variant="outline">{batch?.name}</Badge>
+                          <p className="text-sm text-muted-foreground">{room?.name}</p>
                           <div className="flex gap-2 mt-2">
                              <Dialog open={isChangeRequestOpen} onOpenChange={setIsChangeRequestOpen}>
                                 <DialogTrigger asChild>
@@ -129,16 +143,21 @@ export function FacultyTimetable() {
                                     </form>
                                 </DialogContent>
                              </Dialog>
-                             <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+                             <Dialog open={isUploadOpen} onOpenChange={(isOpen) => {
+                                 setIsUploadOpen(isOpen);
+                                 if (isOpen) {
+                                     setCurrentSubject(subject?.name || '');
+                                 }
+                             }}>
                                 <DialogTrigger asChild>
                                     <Button size="sm" variant="ghost"><Upload className="h-4 w-4 mr-2"/>Materials</Button>
                                 </DialogTrigger>
                                 <DialogContent>
-                                    <form onSubmit={handleUploadMaterial}>
                                     <DialogHeader>
                                         <DialogTitle>Upload Class Materials</DialogTitle>
-                                        <DialogDescription>Upload files for {classInfo.subject}.</DialogDescription>
+                                        <DialogDescription>Upload files for {subject?.name}.</DialogDescription>
                                     </DialogHeader>
+                                    <form onSubmit={handleUploadMaterial}>
                                     <div className="grid w-full max-w-sm items-center gap-1.5 my-4">
                                         <Label htmlFor="materials">PDF, notes, video links</Label>
                                         <Input id="materials" type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />

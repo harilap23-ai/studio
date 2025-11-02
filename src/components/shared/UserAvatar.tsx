@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 interface UserAvatarProps {
   name: string;
@@ -53,19 +54,19 @@ export function UserAvatar({ name, role, avatarUrl }: UserAvatarProps) {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <User />
-            Profile
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Settings />
-            Settings
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/">
-            <LogOut />
-            Log out
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
